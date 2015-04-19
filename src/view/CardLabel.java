@@ -38,7 +38,6 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
         super("", JLabel.CENTER);
         this.card = card;
         setPreferredSize(MainFrame.DIM_CARD);
-//        if(card)
         addMouseListener(this);
         this.pane = pane;
         this.game = game;
@@ -49,7 +48,6 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
             setIcon(card.getImage(MainFrame.DIM_CARD));
         else
             setIcon(MainFrame.getImageIcon(MainFrame.BACK_CARD, MainFrame.DIM_CARD));
-//            setIcon(card.getImage(MainFrame.DIM_CARD));
         this.isVisible = isVisible;
     }
 
