@@ -36,10 +36,11 @@ import model.*;
  *
  * @author Alan Tian <alan.tian at aut.ac.nz>
  */
-public class MainFrame extends JFrame implements ActionListener, MouseListener, MouseMotionListener{
+public class MainFrame extends JFrame implements ActionListener {
 
     // game panel
     public static final String NEW_GAME = "New Game";
+    public static final int CARD_SPAN = 40;
 
     private JPanel pnlGame = new JPanel();
     private JButton btnNewGame = new JButton(NEW_GAME);
@@ -47,7 +48,7 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
     // desk panel
     private JPanel pnlDesk = new JPanel();
     private JPanel pnlUpperDesk = new JPanel();
-    private JPanel pnlLowerDesk = new JPanel();
+    private JLayeredPane pnlLowerDesk = new JLayeredPane();
     private JLabel lblUserAction = new JLabel("User Play: ");
     private JLayeredPane[] pnlCardList = new JLayeredPane[7];
     private JLabel lblDeck = new JLabel();
@@ -57,13 +58,15 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
     private ImagePanel pnlUserDesk;
 
     // 
-    private static Color COLOR_HOMETEAM = new Color(255, 100, 100);
-    private static Color COLOR_GUESTTEAM = new Color(100, 100, 255);
-    private static Dimension DIM_BUTTON = new Dimension(100, 40);
-    private static Font FONT_MONO = new java.awt.Font("Courier New", 0, 11);
-    private static Dimension DIM_CARD = new Dimension(142, 192);
+    public static Color COLOR_HOMETEAM = new Color(255, 100, 100);
+    public static Color COLOR_GUESTTEAM = new Color(100, 100, 255);
+    public static Dimension DIM_BUTTON = new Dimension(100, 40);
+    public static Dimension DIM_CARD = new Dimension(142, 192);
+    public static Font FONT_MONO = new java.awt.Font("Courier New", 0, 11);
 
     private Solitaire game;
+    public static final String EMPTY_CARD="images\\empty.gif";
+    public static final String BACK_CARD="images\\back.png";
 
     private void initGamePanel() {
         pnlGame.setBorder(BorderFactory.createTitledBorder("Game Information"));
@@ -82,7 +85,7 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
 
         for (int i = 0; i < 7; i++) {
             pnlCardList[i] = new JLayeredPane();
-            pnlLowerDesk.add(pnlCardList[i], BorderLayout.WEST);
+            //   pnlLowerDesk.add(pnlCardList[i], BorderLayout.WEST);
         }
         lblDeck.setPreferredSize(DIM_CARD);
         pnlUpperDesk.add(lblDeck, BorderLayout.WEST);
@@ -95,9 +98,10 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
         lblDeck.setPreferredSize(DIM_CARD);
         lblDeckCur.setPreferredSize(DIM_CARD);
 
-        lblUserAction.setPreferredSize(new Dimension(200, 200));
+//        lblUserAction.setPreferredSize(new Dimension(200, 200));
         lblUserAction.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 
+        pnlLowerDesk.setPreferredSize(new Dimension(200, 800));
         pnlLowerDesk.setBorder(BorderFactory.createTitledBorder(null, "Card Lists", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, new Color(255, 255, 255)));
         pnlUpperDesk.setBorder(BorderFactory.createTitledBorder(null, "Card Deck and Stacks", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, new Color(255, 255, 255)));
 
@@ -137,7 +141,7 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
 
     private void addListener() {
         btnNewGame.addActionListener(this);
-        lblDeck.addMouseListener(this);
+//        lblDeck.addMouseListener(this);
     }
 
     private void showGame() {
@@ -149,14 +153,14 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
     private void showDeck() {
         String deckCardName;
         if (game.deck.isEmpty() || game.deck.isFirst()) {
-            deckCardName = "images\\empty.gif";
+            deckCardName = EMPTY_CARD;
         } else {
-            deckCardName = "images\\back.png";
+            deckCardName = BACK_CARD;
         }
         lblDeck.setIcon(getImageIcon(deckCardName, DIM_CARD));
 
         if (game.deck.isEmpty()) {
-            lblDeckCur.setIcon(getImageIcon("images\\empty.gif", DIM_CARD));
+            lblDeckCur.setIcon(getImageIcon(EMPTY_CARD, DIM_CARD));
         } else {
             lblDeckCur.setIcon(game.deck.getCurCard().getImage(DIM_CARD));
         }
@@ -166,14 +170,14 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
         for (int s = 0; s < game.stacks.length; s++) {
             CardStack stack = game.stacks[s];
             if (stack.isEmpty()) {
-                lblStack[s].setIcon(getImageIcon("images\\empty.gif", DIM_CARD));
+                lblStack[s].setIcon(getImageIcon(EMPTY_CARD, DIM_CARD));
             } else {
                 lblStack[s].setIcon(stack.peek().getImage(DIM_CARD));
             }
         }
     }
 
-    public Icon getImageIcon(String fileName, Dimension dim) {
+    public static Icon getImageIcon(String fileName, Dimension dim) {
         try {
             BufferedImage img = ImageIO.read(new File(fileName));
             Image dimImg = img.getScaledInstance((int) dim.getWidth(), (int) dim.getHeight(), Image.SCALE_SMOOTH);
@@ -185,13 +189,42 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
     }
 
     private void showCardLists() {
+        pnlLowerDesk.removeAll();
+        int maxListSize = 0;
+        Rectangle rec = new Rectangle(10, 10, DIM_CARD.width, DIM_CARD.height);
+        for (int l = 0; l < game.lists.length; l++) {
+            CardList list = game.lists[l];
+            CardLabel pre = null;
+            for (int i = 0; i < list.size(); i++) {
+                CardLabel lblCard = new CardLabel(list.get(i), pnlLowerDesk, game);
+                lblCard.setVisible(list.getOpenIndex()<=i);
+                lblCard.setBounds(rec);
+                pnlLowerDesk.add(lblCard, new Integer(i));
+                rec.y += CARD_SPAN;
+                if (i > 0) {
+                    pre.setNext(lblCard);
+                }
+                pre = lblCard;
+            }
+            rec.x += DIM_CARD.width + 10;
+            rec.y = 10;
+            if (maxListSize < list.size()) {
+                maxListSize = list.size();
+            }
+        }
+        pnlLowerDesk.setPreferredSize(
+                new Dimension((DIM_CARD.width + 10) * game.lists.length,
+                        DIM_CARD.height + CARD_SPAN * maxListSize));
+    }
+
+    private void showCardLists_layeredPane() {
         int maxListSize = 0;
         for (int l = 0; l < game.lists.length; l++) {
             pnlCardList[l].removeAll();
             Rectangle rec = new Rectangle(10, 10, DIM_CARD.width, DIM_CARD.height);
             CardList list = game.lists[l];
             for (int i = 0; i < list.size(); i++) {
-                CardLabel lblCardImg = new CardLabel(list.get(i), DIM_CARD);
+                CardLabel lblCardImg = new CardLabel(list.get(i), pnlLowerDesk, game);
                 lblCardImg.setBounds(rec);
                 pnlCardList[l].add(lblCardImg, new Integer(i));
                 rec.y += 40;
@@ -213,47 +246,4 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener, 
             showGame();
         }
     }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        if (e.getSource() == lblDeck) {
-            game.deck.drawCard();
-            showDeck();
-        }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        if (e.getSource() == lblDeck) {
-            lblDeck.setBackground(COLOR_HOMETEAM);
-        }
-        else if(e.getSource() == lblDeckCur){
-            lblDeck.setBackground(COLOR_HOMETEAM);
-        }
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        if (e.getSource() == lblDeck) {
-            lblDeck.setBackground(COLOR_GUESTTEAM);
-        }
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-    }
-
 }

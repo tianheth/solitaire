@@ -49,6 +49,10 @@ public class Card implements Comparable<Card> {
         return (cardIndex-1) % 13 +1;
     }
 
+    /**
+     * 
+     * @return 1:Diamond, 2:Club, 3:Heart, 4:Spade
+     */
     public int getSuit() {
         return (cardIndex-1) / 13 + 1;
     }

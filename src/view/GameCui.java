@@ -61,18 +61,18 @@ public class GameCui {
 
             result = drawCard();
         } else if (cmd[0].compareTo("deckto") == 0) {
-            deckTo(cmd);
+            result = deckTo(cmd);
         } else if (cmd[0].compareTo("link") == 0) {
-            link(cmd);
+            result = link(cmd);
         } else if (cmd[0].compareTo("send") == 0) {
-            send(cmd);
+            result = send(cmd);
         } else if (cmd[0].compareTo("restart") == 0) {
             game.initSolitaire();
+            result = true;
         } else if (cmd[0].compareTo("quit") != 0) {
             output.println(ERR_INVALID_CMD);
         }
-
-        return true;
+        return result;
     }
 
     public void showGame() {
@@ -176,38 +176,20 @@ public class GameCui {
      */
     private boolean deckTo(String[] cmd) {
         if (cmd.length == 1) {
-            Card card = game.deck.getCurCard();
-            for (int s = 0; s < game.stacks.length; s++) {
-                CardStack stack = game.stacks[s];
-                if(stack.isEmpty())
-                    continue;
-                Card stackCard = stack.peek();
-                
-                if (stackCard.compareTo(card) == Card.PREVIOUS) {
-                    game.stacks[s].add(card);
-                    game.deck.takeCard();
-                    return true;
-                }
-            }
-            // none stack is available for this card
-            return false;
-        }
-
-        if (cmd.length != 2) {
+            return game.deckTo();
+        } else if (cmd.length != 2) {
             output.println(ERR_INVALID_CMD);
             return false;
-        }
-
-        int listIndex = Integer.valueOf(cmd[1]);
-        if (!validListIndex(listIndex)) {
-            return false;
-        }
-        if (game.deck.getCurCard().compareTo(game.lists[listIndex-1].getTailCard()) == Card.ABOVE) {
-            game.lists[listIndex-1].add(game.deck.takeCard());
-            return true;
         } else {
-            output.println(ERR_INVALID_MOVE);
-            return false;
+            int listIndex = Integer.valueOf(cmd[1])-1;
+            if (!validListIndex(listIndex)) {
+                return false;
+            } else if (!game.deckTo(listIndex)) {
+                output.println(ERR_INVALID_MOVE);
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -225,7 +207,7 @@ public class GameCui {
             return false;
         }
 
-        int listIndex = Integer.valueOf(cmd[2]);
+        int listIndex = Integer.valueOf(cmd[2])-1;
         if (!validListIndex(listIndex)) {
             return false;
         }
@@ -236,28 +218,12 @@ public class GameCui {
             return false;
         }
 
-        CardList list;
-        for (int l = 0; l < Solitaire.LIST_NUM; l++) {
-            list = game.lists[l];
-            // looking for card
-            Card card = list.findCard(cardIndex);
-
-            if (card != null) {
-                CardList targetList = game.lists[listIndex - 1];
-                Card tailCard = targetList.getTailCard();
-                // check if linkable 
-                if (card.compareTo(tailCard) == Card.ABOVE) {
-                    CardList newList = list.cut(list.indexOf(card));
-                    newList.link(targetList);
-                    return true;
-                } else {
-                    output.println(ERR_INVALID_MOVE);
-                    return false;
-                }
-            }
+        if (!game.link(cardIndex, listIndex)) {
+            output.println(ERR_INVALID_CARD);
+            return false;
+        } else {
+            return true;
         }
-        output.println(ERR_INVALID_CARD);
-        return false;
     }
 
     /**
@@ -306,21 +272,11 @@ public class GameCui {
     }
 
     private boolean validListIndex(int index) {
-        boolean valid = (1 <= index) && (index <= Solitaire.LIST_NUM);
+        boolean valid = (index>=0) && (index < Solitaire.LIST_NUM);
         if (!valid) {
             output.println(ERR_INVALID_LIST);
         }
         return valid;
-    }
-
-    public int locateListByTail(int tailCardIndex) {
-        for (int l = 0; l < LIST_NUM; l++) {
-            if (game.lists[l].getTailCard().getIndex() == tailCardIndex) {
-                return l;
-            }
-        }
-        output.println(ERR_INVALID_CARD);
-        return -1;
     }
 
 }

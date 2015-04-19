@@ -11,18 +11,18 @@ import model.list.SinglyStack;
  *
  * @author Alan Tian
  */
-public class CardStack extends SinglyStack<Card>{
-
-//    private SinglyStack<Card> stack;
-    
-//    public CardStack(){
-//        stack = new SinglyStack<Card>();
-//    }
+public class CardStack extends SinglyStack<Card> {
 
     public boolean add(Card card) {
         push(card);
         return true;
     }
-    
-    
+
+    public boolean isAddable(Card card) {
+        if (isEmpty()) {
+            return card.getValue() == 1;
+        } else {
+            return peek().compareTo(card) == Card.PREVIOUS;
+        }
+    }
 }
