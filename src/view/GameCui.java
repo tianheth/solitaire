@@ -272,7 +272,7 @@ public class GameCui {
     }
 
     private boolean validListIndex(int index) {
-        boolean valid = (index>=0) && (index < Solitaire.LIST_NUM);
+        boolean valid = Solitaire.validListIndex(index);
         if (!valid) {
             output.println(ERR_INVALID_LIST);
         }

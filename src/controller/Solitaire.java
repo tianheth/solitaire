@@ -15,7 +15,7 @@ import view.MainFrame;
  *
  * @author cvg2836
  */
-public class Solitaire extends java.util.Observable {
+public class Solitaire{
 
     public static final int LIST_NUM = 7;
     public static final int STACK_NUM = 4;
@@ -27,7 +27,6 @@ public class Solitaire extends java.util.Observable {
     public Solitaire() {
         stacks = new CardStack[STACK_NUM];
         lists = new CardList[LIST_NUM];
-        initSolitaire();
     }
 
     /**
@@ -36,6 +35,7 @@ public class Solitaire extends java.util.Observable {
     public static void main(String[] args) {
 
         Solitaire game = new Solitaire();
+        game.initSolitaire();
         showGui(game);
         game.startGame();
     }
@@ -114,7 +114,6 @@ public class Solitaire extends java.util.Observable {
         if (stack.isAddable(card)) {
             stack.add(card);
             deck.takeCard();
-            notify();
             return true;
         } else {
             return false;
@@ -124,7 +123,8 @@ public class Solitaire extends java.util.Observable {
     public boolean deckTo(int listIndex){
         Card card = deck.getCurCard();
         CardList list = lists[listIndex];
-        if (card.compareTo(list.getTailCard()) == Card.ABOVE) {
+        Card tail = list.getTailCard();
+        if (tail==null || card.compareTo(tail) == Card.ABOVE) {
             list.add(deck.takeCard());
             return true;
         } else {
@@ -149,7 +149,7 @@ public class Solitaire extends java.util.Observable {
                 CardList targetList = lists[listIndex];
                 Card tailCard = targetList.getTailCard();
                 // check if linkable 
-                if (card.compareTo(tailCard) == Card.ABOVE) {
+                if (tailCard==null ||card.compareTo(tailCard) == Card.ABOVE) {
                     CardList newList = list.cut(list.indexOf(card));
                     newList.link(targetList);
                     return true;
@@ -169,17 +169,24 @@ public class Solitaire extends java.util.Observable {
                 continue;
             }
             Card card = lists[listIndex].getTailCard();
+            
+            // find card
             if (card.getIndex() == cardIndex) {
                 CardStack stack = stacks[card.getSuit() - 1];
                 if(stack.isAddable(card)){
                     stack.add(card);
                     lists[listIndex].moveTail();
-                    notify();
                     return true;
                 }
+                else
+                    return false;
             }
         }
         
-        return true;
+        return false;
+    }
+    
+    public static boolean validListIndex(int index) {
+        return (index>=0) && (index < LIST_NUM);
     }
 }

@@ -24,45 +24,51 @@ import model.Card;
  * @author Alan Tian
  */
 public class CardLabel extends JLabel implements MouseListener, MouseMotionListener {
-
     private Card card;
     private CardLabel next = null;
     private JLayeredPane pane;
     private Point firstClick = new Point();
     private int origLayer = 0;
     private Point origLocation;
-    private Solitaire game;
     private boolean isVisible = false;
+    private Dimension dimCard;
+    private boolean fromDeck = false;
+    
+    private Solitaire game;
+    private MainFrame mainFrame;
 
-    public CardLabel(Card card, JLayeredPane pane, Solitaire game) {
+    public CardLabel(Card card, MainFrame frame, Solitaire game) {
         super("", JLabel.CENTER);
         this.card = card;
-        setPreferredSize(MainFrame.DIM_CARD);
+        this.dimCard = MainFrame.dimCard;
+        setPreferredSize(dimCard);
         addMouseListener(this);
-        this.pane = pane;
+        pane = frame.getPnlDesk();
         this.game = game;
-    }
-    
-    public void setVisible(boolean isVisible){
-        if(isVisible)
-            setIcon(card.getImage(MainFrame.DIM_CARD));
-        else
-            setIcon(MainFrame.getImageIcon(MainFrame.BACK_CARD, MainFrame.DIM_CARD));
-        this.isVisible = isVisible;
+        this.mainFrame = frame;
+        fromDeck = game.deck.getCurCard() == card;
     }
 
-    public CardLabel() {
-        super("", JLabel.CENTER);
-        this.card = null;
-//        setPreferredSize(dim);
-//        setIcon(card.getImage(dim));
-//        addMouseListener(this);
+    public void setVisible(boolean isVisible) {
+        if (isVisible) {
+            setIcon(card.getImage(dimCard));
+        } else {
+            setIcon(MainFrame.getImageIcon(MainFrame.BACK_CARD, dimCard));
+        }
+        this.isVisible = isVisible;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(e.getClickCount() == 2)
-            game.send(card.getIndex());
+        if (e.getClickCount() == 2) {
+            boolean moved = false;
+            if(fromDeck)
+                moved = game.deckTo();
+            else
+                moved = game.send(card.getIndex());
+            if(moved)
+                mainFrame.showGame();
+        }
 //        System.out.println(card.toString());
     }
 
@@ -79,18 +85,31 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
     @Override
     public void mouseReleased(MouseEvent e) {
         removeMouseMotionListener(this);
+
+        if (!isVisible) {
+            return;
+        }
+
         //check drop locaton
-        int iList = mapList(getLocation());
-        CardLabel tail = findListTail(iList);
-        
-//        if (link(iList)) {
+        int iList = MainFrame.mapListArea(getLocation());
+        if (!Solitaire.validListIndex(iList)) {
+            setCardsLocation(origLocation, origLayer);
+            return;
+        }
+//        CardLabel tail = findListTail(iList);
+//        Point location = new Point(tail.getLocation().x, tail.getLocation().y + MainFrame.dimSpan.height);
+
+        boolean linkSuccess = false;
+        if (fromDeck) {
+            linkSuccess = game.deckTo(iList);
+        } else {
+            linkSuccess = game.link(card.getIndex(), iList);
+        }
+
+        if (linkSuccess) {
+            mainFrame.showGame();
+//            setCardsLocation(location, pane.getLayer(tail));
 //            tail.setNext(this);
-//        }
-        
-        if (link(iList)) {
-            Point location = new Point(tail.getLocation().x, tail.getLocation().y + MainFrame.CARD_SPAN);
-            setCardsLocation(location, pane.getLayer(tail));
-            tail.setNext(this);
         } else {
             setCardsLocation(origLocation, origLayer);
         }
@@ -108,9 +127,10 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if(!isVisible)
+        if (!isVisible) {
             return;
-        Point moudseLocation = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), this.pane);
+        }
+        Point moudseLocation = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), pane);
         Point location = new Point(moudseLocation.x - firstClick.x, moudseLocation.y - firstClick.y);
 //        System.out.println("draged:"+card.toString()+"->x:"+p.x+", y:"+p.y);
         int layer = pane.highestLayer() + 1;
@@ -136,23 +156,13 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
 
         CardLabel aux = next;
         while (aux != null) {
-            location.y += MainFrame.CARD_SPAN;
+            location.y += MainFrame.dimSpan.height;
             aux.setLocation(location);
             layer++;
             pane.setLayer(aux, layer);
             pane.setPosition(aux, 0);
             aux = aux.getNext();
         }
-    }
-
-    private int mapList(Point location) {
-        int iList = location.x / MainFrame.DIM_CARD.width % 7;
-//        System.out.println(iList);
-        return iList;
-    }
-
-    private boolean link(int iList) {
-        return game.link(card.getIndex(), iList);
     }
 
     private CardLabel findListTail(int iList) {

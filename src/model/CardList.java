@@ -86,7 +86,7 @@ public class CardList extends CircularList<Card> {
             tailCard = tailCard_L1.value();
             tail.setNext(tailCard_L1);
             nodeCount = index;
-            
+
             if (openIndex == index) {
                 openIndex--;
             }
@@ -96,26 +96,30 @@ public class CardList extends CircularList<Card> {
 
     /**
      * Join this list to the tail of the other list, if the rules allow this;
-     * have to check the rules before calling this method; the first card of this
-     * list is 'ABOVE' the tail card of the other list
+     * have to check the rules before calling this method; the first card of
+     * this list is 'ABOVE' the tail card of the other list
      *
      * @param list1 the list that linked to, this list would be list2
      */
     public void link(CardList list1) {
-        CircularNode<Card> tailCard_L1 = list1.getTailNode().next();
-        CircularNode<Card> headCard_L1 = tailCard_L1.next();
-        CircularNode<Card> tailCard_L2 = tail.next();
-        CircularNode<Card> headCard_L2 = tailCard_L2.next();
+        if (!list1.isEmpty()) {
+            CircularNode<Card> tailCard_L1 = list1.getTailNode().next();
+            CircularNode<Card> headCard_L1 = tailCard_L1.next();
+            CircularNode<Card> tailCard_L2 = tail.next();
+            CircularNode<Card> headCard_L2 = tailCard_L2.next();
 
-        // reset links for the list 1
-        tailCard_L1.setNext(headCard_L2);
-        headCard_L1.setPrev(tailCard_L2);
+            // reset links for the list 1
+            tailCard_L1.setNext(headCard_L2);
+            headCard_L1.setPrev(tailCard_L2);
 
-        // reset links for the list 2
-        tailCard_L2.setNext(headCard_L1);
-        headCard_L2.setPrev(tailCard_L1);
+            // reset links for the list 2
+            tailCard_L2.setNext(headCard_L1);
+            headCard_L2.setPrev(tailCard_L1);
+        }
+        else
+            list1.setOpenIndex(0);
 
-        list1.setTailCard((Card)tail.next().value());
+        list1.setTailCard((Card) tail.next().value());
         list1.setTailNode(tail);
         list1.setSize(list1.size() + size());
     }
@@ -129,6 +133,9 @@ public class CardList extends CircularList<Card> {
     public void add(Card newCard) {
         add(size(), newCard);
         tailCard = newCard;
+        if (openIndex < 0) {
+            openIndex = 0;
+        }
     }
 
     /**

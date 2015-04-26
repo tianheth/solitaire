@@ -8,6 +8,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -36,80 +37,50 @@ import model.*;
  *
  * @author Alan Tian <alan.tian at aut.ac.nz>
  */
-public class MainFrame extends JFrame implements ActionListener {
+public class MainFrame extends JFrame implements ActionListener, MouseListener {
 
     // game panel
     public static final String NEW_GAME = "New Game";
-    public static final int CARD_SPAN = 40;
 
     private JPanel pnlGame = new JPanel();
     private JButton btnNewGame = new JButton(NEW_GAME);
     private JTextArea txtGameInfor = new JTextArea();
     // desk panel
-    private JPanel pnlDesk = new JPanel();
-    private JPanel pnlUpperDesk = new JPanel();
-    private JLayeredPane pnlLowerDesk = new JLayeredPane();
-    private JLabel lblUserAction = new JLabel("User Play: ");
-    private JLayeredPane[] pnlCardList = new JLayeredPane[7];
+    private JLayeredPane pnlDesk = new JLayeredPane();
     private JLabel lblDeck = new JLabel();
-    private CardLabel lblDeckCur = new CardLabel();
+    private CardLabel lblDeckCur;
 //    private CardLabel lblDeckPre = new CardLabel();
     private JLabel[] lblStack = new JLabel[4];
-    private ImagePanel pnlUserDesk;
 
     // 
     public static Color COLOR_HOMETEAM = new Color(255, 100, 100);
     public static Color COLOR_GUESTTEAM = new Color(100, 100, 255);
     public static Dimension DIM_BUTTON = new Dimension(100, 40);
-    public static Dimension DIM_CARD = new Dimension(142, 192);
+//    public static Dimension DIM_CARD = new Dimension(142, 192);
+//    public static final int CARD_SPAN = 40;
     public static Font FONT_MONO = new java.awt.Font("Courier New", 0, 11);
 
-    private Solitaire game;
-    public static final String EMPTY_CARD="images\\empty.gif";
-    public static final String BACK_CARD="images\\back.png";
+    public static Dimension dimCard;
+    public static Dimension dimSpan;
+    public static Dimension dimFrame;
 
-    private void initGamePanel() {
+    private Solitaire game;
+    public static final String EMPTY_CARD = "images\\empty.gif";
+    public static final String BACK_CARD = "images\\back.png";
+
+    private void initGamePanel(Dimension d) {
         pnlGame.setBorder(BorderFactory.createTitledBorder("Game Information"));
-        pnlGame.setPreferredSize(new Dimension(250, 600));
+        pnlGame.setPreferredSize(d);
 
         btnNewGame.setPreferredSize(DIM_BUTTON);
-        txtGameInfor.setPreferredSize(new Dimension(200, 200));
+        txtGameInfor.setPreferredSize(new Dimension(d.width - 30, d.height / 5));
 
         pnlGame.add(btnNewGame);
         pnlGame.add(txtGameInfor);
     }
 
     private void initDeskPanel() {
-        Image imgDesk = Toolkit.getDefaultToolkit().createImage("images\\summit.png");
-        pnlUserDesk = new ImagePanel(new BorderLayout(), imgDesk);
-
-        for (int i = 0; i < 7; i++) {
-            pnlCardList[i] = new JLayeredPane();
-            //   pnlLowerDesk.add(pnlCardList[i], BorderLayout.WEST);
-        }
-        lblDeck.setPreferredSize(DIM_CARD);
-        pnlUpperDesk.add(lblDeck, BorderLayout.WEST);
-        pnlUpperDesk.add(lblDeckCur, BorderLayout.WEST);
-        for (int i = 0; i < 4; i++) {
-            lblStack[i] = new JLabel();
-            pnlUpperDesk.add(lblStack[i], BorderLayout.WEST);
-            lblStack[i].setPreferredSize(DIM_CARD);
-        }
-        lblDeck.setPreferredSize(DIM_CARD);
-        lblDeckCur.setPreferredSize(DIM_CARD);
-
-//        lblUserAction.setPreferredSize(new Dimension(200, 200));
-        lblUserAction.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-
-        pnlLowerDesk.setPreferredSize(new Dimension(200, 800));
-        pnlLowerDesk.setBorder(BorderFactory.createTitledBorder(null, "Card Lists", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, new Color(255, 255, 255)));
-        pnlUpperDesk.setBorder(BorderFactory.createTitledBorder(null, "Card Deck and Stacks", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, new Color(255, 255, 255)));
-
-        pnlUserDesk.add(pnlUpperDesk, BorderLayout.NORTH);
-        pnlUserDesk.add(pnlLowerDesk, BorderLayout.CENTER);
-
-        pnlDesk.add(pnlUserDesk);
-
+        pnlDesk.setLayout(null);
         showGame();
     }
 
@@ -122,57 +93,74 @@ public class MainFrame extends JFrame implements ActionListener {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("Solitaire Game");
 
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        int frameWidth = dim.width * 2 / 3;
-        int frameHeight = dim.height * 2 / 3;
-        this.setSize(frameWidth, frameHeight);
+        Dimension dimScreen = Toolkit.getDefaultToolkit().getScreenSize();
+        dimFrame = new Dimension(dimScreen.width * 2 / 3 * 6 / 5, dimScreen.height * 2 / 3);
+        this.setSize(dimFrame);
 
-        this.setLocation((dim.width - frameWidth) / 2,
-                (dim.height - frameHeight) / 2);
+        this.setLocation((dimScreen.width - dimFrame.width) / 2,
+                (dimScreen.height - dimFrame.height) / 2);
+
+        dimCard = new Dimension(dimFrame.width * 25 / 6 / (6 * 7 + 3), dimFrame.height * 5 / (1 + 5 + 2 + 5 + 7));
+        dimSpan = new Dimension(dimCard.width / 5, dimCard.height / 5);
 
         initDeskPanel();
-        initGamePanel();
+        initGamePanel(new Dimension(dimFrame.width / 5, dimFrame.height));
 
         this.add(pnlGame, BorderLayout.EAST);
-        this.add(pnlDesk, BorderLayout.CENTER);
+        this.add(pnlDesk);
 
         addListener();
     }
 
     private void addListener() {
         btnNewGame.addActionListener(this);
-//        lblDeck.addMouseListener(this);
+        lblDeck.addMouseListener(this);
     }
 
-    private void showGame() {
+    public void showGame() {
+        pnlDesk.removeAll();
         showDeck();
         showStacks();
         showCardLists();
     }
 
     private void showDeck() {
+        lblDeckCur = new CardLabel(game.deck.getCurCard(), this, game);
+
+        Point posDeck = new Point(dimSpan.width, dimSpan.height);
+        Rectangle recDeck = new Rectangle(posDeck.x, posDeck.y, dimCard.width, dimCard.height);
+        lblDeck.setBounds(recDeck);
+        pnlDesk.add(lblDeck);
+        recDeck.x += dimCard.width + dimSpan.width;
+        lblDeckCur.setBounds(recDeck);
+        lblDeckCur.setVisible(!game.deck.isEmpty());
+        pnlDesk.add(lblDeckCur);
+
         String deckCardName;
         if (game.deck.isEmpty() || game.deck.isFirst()) {
             deckCardName = EMPTY_CARD;
         } else {
             deckCardName = BACK_CARD;
         }
-        lblDeck.setIcon(getImageIcon(deckCardName, DIM_CARD));
-
-        if (game.deck.isEmpty()) {
-            lblDeckCur.setIcon(getImageIcon(EMPTY_CARD, DIM_CARD));
-        } else {
-            lblDeckCur.setIcon(game.deck.getCurCard().getImage(DIM_CARD));
-        }
+        lblDeck.setIcon(getImageIcon(deckCardName, dimCard));
     }
 
     private void showStacks() {
+        Point posStack = new Point(dimCard.width * 3 + dimSpan.width * 4, dimSpan.height);
+        Rectangle recStack = new Rectangle(posStack.x, posStack.y, dimCard.width, dimCard.height);
+        for (int i = 0; i < 4; i++) {
+            lblStack[i] = new JLabel();
+            lblStack[i].setBounds(recStack);
+            recStack.x += dimCard.width + dimSpan.width;
+            pnlDesk.add(lblStack[i]);
+        }
+
         for (int s = 0; s < game.stacks.length; s++) {
             CardStack stack = game.stacks[s];
             if (stack.isEmpty()) {
-                lblStack[s].setIcon(getImageIcon(EMPTY_CARD, DIM_CARD));
+                lblStack[s].setIcon(getImageIcon(EMPTY_CARD, dimCard));
             } else {
-                lblStack[s].setIcon(stack.peek().getImage(DIM_CARD));
+                lblStack[s].setIcon(stack.peek().getImage(dimCard));
             }
         }
     }
@@ -189,61 +177,75 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void showCardLists() {
-        pnlLowerDesk.removeAll();
         int maxListSize = 0;
-        Rectangle rec = new Rectangle(10, 10, DIM_CARD.width, DIM_CARD.height);
+        int y = dimSpan.height * 2 + dimCard.height;
+        Rectangle rec = new Rectangle(dimSpan.width, y, dimCard.width, dimCard.height);
         for (int l = 0; l < game.lists.length; l++) {
             CardList list = game.lists[l];
             CardLabel pre = null;
+            rec.y = y;
             for (int i = 0; i < list.size(); i++) {
-                CardLabel lblCard = new CardLabel(list.get(i), pnlLowerDesk, game);
-                lblCard.setVisible(list.getOpenIndex()<=i);
+                CardLabel lblCard = new CardLabel(list.get(i), this, game);
+                lblCard.setVisible(list.getOpenIndex() <= i);
                 lblCard.setBounds(rec);
-                pnlLowerDesk.add(lblCard, new Integer(i));
-                rec.y += CARD_SPAN;
+//                pnlLowerDesk.add(lblCard, new Integer(i));
+                pnlDesk.add(lblCard, new Integer(i));
+                rec.y += dimSpan.height;
                 if (i > 0) {
                     pre.setNext(lblCard);
                 }
                 pre = lblCard;
             }
-            rec.x += DIM_CARD.width + 10;
-            rec.y = 10;
+            rec.x += dimSpan.width + dimCard.width;
             if (maxListSize < list.size()) {
                 maxListSize = list.size();
             }
         }
-        pnlLowerDesk.setPreferredSize(
-                new Dimension((DIM_CARD.width + 10) * game.lists.length,
-                        DIM_CARD.height + CARD_SPAN * maxListSize));
+        pnlDesk.setPreferredSize(new Dimension(dimFrame.width * 4 / 5, dimCard.height + dimSpan.height * maxListSize - 1));
     }
 
-    private void showCardLists_layeredPane() {
-        int maxListSize = 0;
-        for (int l = 0; l < game.lists.length; l++) {
-            pnlCardList[l].removeAll();
-            Rectangle rec = new Rectangle(10, 10, DIM_CARD.width, DIM_CARD.height);
-            CardList list = game.lists[l];
-            for (int i = 0; i < list.size(); i++) {
-                CardLabel lblCardImg = new CardLabel(list.get(i), pnlLowerDesk, game);
-                lblCardImg.setBounds(rec);
-                pnlCardList[l].add(lblCardImg, new Integer(i));
-                rec.y += 40;
-            }
-            if (maxListSize < list.size()) {
-                maxListSize = list.size();
-            }
-        }
-        for (int l = 0; l < game.lists.length; l++) {
-            pnlCardList[l].setPreferredSize(new Dimension(DIM_CARD.width + 10, DIM_CARD.height + 40 * maxListSize - 1));
+    public static int mapListArea(Point p) {
+        int yPos = dimSpan.height * 2 + dimCard.height;
+        if (p.y >= yPos) {
+            return p.x / (dimCard.width + dimSpan.width) % 7;
+        } else {
+            return -1;
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         if (e.getActionCommand().equalsIgnoreCase(NEW_GAME)) {
             game.initSolitaire();
             showGame();
         }
+    }
+
+    JLayeredPane getPnlDesk() {
+        return pnlDesk;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if (e.getSource() == lblDeck) {
+            game.deck.drawCard();
+            showGame();
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 }
