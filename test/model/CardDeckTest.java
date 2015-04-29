@@ -6,7 +6,8 @@
 package model;
 
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -71,5 +72,16 @@ public class CardDeckTest {
         card = deck.takeCard();
         assertEquals("D_1", card.toString());
         assertEquals("D_3", deck.getCurCard().toString());
+    }
+    @Test
+    public void testCardDeckTakeCardToEmpty() {
+        assertEquals(4, deck.size());
+        deck.takeCard();
+        deck.takeCard();
+        deck.takeCard();
+        Card card = deck.takeCard();
+        assertEquals("D_1", card.toString());
+        assertTrue(deck.isEmpty());
+        assertEquals(null, deck.getCurCard());
     }
 }

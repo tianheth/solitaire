@@ -50,15 +50,9 @@ public class CardDeck extends CircularList<Card> {
             curCardNode = curCardNode.next();
         }
         remove(node);
-//        if (card != null) {
-//            if (index <= size() - 1) {
-//                curCard = getNode(index).value();
-//            } else if (index > 0) {
-//                curCard = getNode(index - 1).value();
-//            } else {
-//                curCard = null;
-//            }
-//        }
+        if (isEmpty()) {
+            curCardNode = null;
+        }
         return card;
     }
 
@@ -67,7 +61,11 @@ public class CardDeck extends CircularList<Card> {
     }
 
     public Card getCurCard() {
-        return curCardNode.value();
+        if (curCardNode == null) {
+            return null;
+        } else {
+            return curCardNode.value();
+        }
     }
 
     public boolean isFirst() {

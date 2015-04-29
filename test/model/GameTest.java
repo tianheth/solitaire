@@ -49,14 +49,17 @@ public class GameTest {
     public void setUp() {
         System.out.println("setup");
         game.deck = new CardDeck();
-        for (int i = 0; i < game.lists.length; i++) {
+        for (int i = 0; i < Solitaire.LIST_NUM; i++) {
             game.lists[i] = new CardList();
         }
         
-        for (int i = 0; i < game.stacks.length; i++) {
+        for (int i = 0; i < Solitaire.STACK_NUM; i++) {
             game.stacks[i] = new CardStack();
         }
 
+    }
+
+    private void insertOrderCards(){
         int c = 0;
 
         for (int i = 0; i < LIST_NUM; i++) {
@@ -70,7 +73,6 @@ public class GameTest {
         for (int i = c; i < cardSet.length; i++) {
             game.deck.add(cardSet[i]);
         }
-//        game.deck.setCurCard(cardSet[cardSet.length-1]);
         game.deck.setCurCard(game.deck.size()-1);
     }
     
@@ -88,6 +90,7 @@ public class GameTest {
 
     @Test
     public void testCardListCut() {
+        insertOrderCards();
         CardList list = new CardList();
         list.add(new Card(Card.mapCardName("S_1")));
         list.add(new Card(Card.mapCardName("S_2")));
@@ -97,9 +100,33 @@ public class GameTest {
     }
     
     @Test
+    public void testGameWin() {
+        Card card;
+        for(int s=0; s<Solitaire.STACK_NUM; s++)
+        {
+            for(int i=1; i<Card.SUIT_SIZE; i++){
+                card = cardSet[s*Card.SUIT_SIZE+i-1];
+                game.stacks[s].add(card);
+            }
+        }
+        for(int l=1; l<=Solitaire.STACK_NUM; l++){
+            card = cardSet[l*Card.SUIT_SIZE-1];
+            game.lists[l].add(card);
+        }
+        game.send(13);
+        game.send(26);
+        game.send(39);
+        assertFalse(game.isGameWin());
+        game.send(52);
+        assertTrue(game.isGameWin());
+    }    
+    
+    @Test
     public void testCui() {
         System.out.println("test CUI");
 
+        insertOrderCards();
+        
         GameCui cui = new GameCui(game);
         cui.showGame();
         

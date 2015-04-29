@@ -149,13 +149,14 @@ public class CircularList<E> implements AbstractList<E> {
     
     protected void remove(CircularNode<E> node){
         if(nodeCount == 1)
-            tail.setNext(null);
+            tail = null;
         else{
             node.prev().setNext(node.next());
             node.next().setPrev(node.prev());
             if (node == tail.next())
                 tail.setNext(node.prev());
         }
+        nodeCount--;
     }
 
     @Override

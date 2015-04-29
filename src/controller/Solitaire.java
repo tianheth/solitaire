@@ -15,7 +15,7 @@ import view.MainFrame;
  *
  * @author cvg2836
  */
-public class Solitaire{
+public class Solitaire {
 
     public static final int LIST_NUM = 7;
     public static final int STACK_NUM = 4;
@@ -104,6 +104,7 @@ public class Solitaire{
 
     /**
      * take the current card from deck to the suitable stack
+     *
      * @return true for success, false for failed (wrong move)
      */
     public boolean deckTo() {
@@ -119,26 +120,33 @@ public class Solitaire{
             return false;
         }
     }
-    
-    public boolean deckTo(int listIndex){
+
+    /**
+     * take the current card from deck to the target list
+     *
+     * @param listIndex target card list
+     * @return true if success, otherwise false
+     */
+    public boolean deckTo(int listIndex) {
         Card card = deck.getCurCard();
         CardList list = lists[listIndex];
         Card tail = list.getTailCard();
-        if (tail==null || card.compareTo(tail) == Card.ABOVE) {
+        if (tail == null || card.compareTo(tail) == Card.ABOVE) {
             list.add(deck.takeCard());
             return true;
         } else {
             return false;
         }
     }
-    
+
     /**
      * link the card into the end of the list
+     *
      * @param cardIndex card to be cut from the old list
      * @param listIndex target list index
      * @return true for success, false for failed
      */
-    public boolean link(int cardIndex, int listIndex){
+    public boolean link(int cardIndex, int listIndex) {
         CardList list;
         for (int l = 0; l < Solitaire.LIST_NUM; l++) {
             list = lists[l];
@@ -149,7 +157,7 @@ public class Solitaire{
                 CardList targetList = lists[listIndex];
                 Card tailCard = targetList.getTailCard();
                 // check if linkable 
-                if (tailCard==null ||card.compareTo(tailCard) == Card.ABOVE) {
+                if (tailCard == null || card.compareTo(tailCard) == Card.ABOVE) {
                     CardList newList = list.cut(list.indexOf(card));
                     newList.link(targetList);
                     return true;
@@ -161,32 +169,54 @@ public class Solitaire{
         // didn't find card
         return false;
     }
-    
-    public boolean send(int cardIndex){
+
+    /**
+     * send a card from list to stack. card is located by it's card index
+     * through all lists.
+     *
+     * @param cardIndex card index of the card to be send
+     * @return true if send success, otherwise false
+     */
+    public boolean send(int cardIndex) {
         // locate list
         for (int listIndex = 0; listIndex < LIST_NUM; listIndex++) {
             if (lists[listIndex].isEmpty()) {
                 continue;
             }
             Card card = lists[listIndex].getTailCard();
-            
+
             // find card
             if (card.getIndex() == cardIndex) {
                 CardStack stack = stacks[card.getSuit() - 1];
-                if(stack.isAddable(card)){
+                if (stack.isAddable(card)) {
                     stack.add(card);
                     lists[listIndex].moveTail();
                     return true;
-                }
-                else
+                } else {
                     return false;
+                }
             }
         }
-        
+
         return false;
     }
-    
+
+    public boolean isGameWin() {
+        for (int s = 0; s < stacks.length; s++) {
+            if (stacks[s].size() != Card.SUIT_SIZE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * check if the list index is between 0 to 6
+     *
+     * @param index list index to be checked
+     * @return true for valid index, otherwise false
+     */
     public static boolean validListIndex(int index) {
-        return (index>=0) && (index < LIST_NUM);
+        return (index >= 0) && (index < LIST_NUM);
     }
 }

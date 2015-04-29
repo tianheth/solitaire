@@ -19,6 +19,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import static java.lang.Thread.sleep;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -30,6 +33,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import model.*;
 
@@ -122,10 +126,15 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
         showDeck();
         showStacks();
         showCardLists();
+        repaint();
     }
 
     private void showDeck() {
-        lblDeckCur = new CardLabel(game.deck.getCurCard(), this, game);
+        if (game.deck.isEmpty()) {
+            return;
+        }
+        Card deckCurCard = game.deck.getCurCard();
+        lblDeckCur = new CardLabel(deckCurCard, this, game);
 
         Point posDeck = new Point(dimSpan.width, dimSpan.height);
         Rectangle recDeck = new Rectangle(posDeck.x, posDeck.y, dimCard.width, dimCard.height);
@@ -217,6 +226,7 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().equalsIgnoreCase(NEW_GAME)) {
             game.initSolitaire();
+//            showGameWin();
             showGame();
         }
     }
@@ -228,8 +238,10 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         if (e.getSource() == lblDeck) {
-            game.deck.drawCard();
-            showGame();
+            if (!game.deck.isEmpty()) {
+                game.deck.drawCard();
+                showGame();
+            }
         }
     }
 
@@ -247,5 +259,42 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+    }
+
+    public void moveStack() {
+        for (int s = 0; s < Solitaire.STACK_NUM; s++) {
+            Point loc = lblStack[s].getLocation();
+            if (loc.y > dimFrame.height) {
+                animationTimer.stop();
+//                showGame();
+            } else {
+                loc.x -= Math.random() * 20 * s - 5;
+                loc.y += 10;
+                lblStack[s].setLocation(loc);
+            }
+        }
+    }
+
+    private Timer animationTimer;
+
+    void showGameWin() {
+        class showGameWinActionListener implements ActionListener {
+
+            MainFrame frame;
+
+            public showGameWinActionListener(MainFrame frame) {
+                this.frame = frame;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.moveStack();
+            }
+        }
+
+        ActionListener al = new showGameWinActionListener(this);
+        animationTimer = new Timer(30, al);
+        animationTimer.setRepeats(true);
+        animationTimer.start();
     }
 }

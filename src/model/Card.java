@@ -25,6 +25,7 @@ public class Card implements Comparable<Card> {
     public static final int HEART = 3;
     public static final int CLUB = 2;
     public static final int DIAMOND = 1;
+    public static final int SUIT_SIZE = 13;
 
     public static final int PREVIOUS = 1;
     public static final int ABOVE = 2;
@@ -46,7 +47,7 @@ public class Card implements Comparable<Card> {
     }
 
     public int getValue() {
-        return (cardIndex-1) % 13 +1;
+        return (cardIndex-1) % SUIT_SIZE +1;
     }
 
     /**
@@ -54,7 +55,7 @@ public class Card implements Comparable<Card> {
      * @return 1:Diamond, 2:Club, 3:Heart, 4:Spade
      */
     public int getSuit() {
-        return (cardIndex-1) / 13 + 1;
+        return (cardIndex-1) / SUIT_SIZE + 1;
     }
 
     public int getColor() {

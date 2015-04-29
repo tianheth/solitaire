@@ -66,8 +66,11 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
                 moved = game.deckTo();
             else
                 moved = game.send(card.getIndex());
-            if(moved)
+            if(moved){
                 mainFrame.showGame();
+                if (game.isGameWin())
+                    mainFrame.showGameWin();
+            }
         }
 //        System.out.println(card.toString());
     }
