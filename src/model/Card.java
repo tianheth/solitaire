@@ -17,7 +17,7 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
  */
 public class Card implements Comparable<Card> {
 

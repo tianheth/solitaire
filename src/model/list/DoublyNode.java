@@ -7,16 +7,17 @@ package model.list;
 
 /**
  *
- * @author Alan Tian 1302662
+ * Alan Tian 1302662
  */
-public class CircularNode<E> {
-
+public class DoublyNode<E> {
         private E data;
         private CircularNode<E> nextElement;
+        private CircularNode<E> prevElement;
 
-        public CircularNode(E value, CircularNode<E> next) {
+        public DoublyNode(E value, CircularNode<E> prev, CircularNode<E> next) {
             data = value;
             nextElement = next;
+            prevElement = prev;
         }
 
         public CircularNode<E> getNext() {
@@ -25,6 +26,14 @@ public class CircularNode<E> {
 
         public void setNext(CircularNode<E> next) {
             nextElement = next;
+        }
+
+        public CircularNode<E> getPrev() {
+            return prevElement;
+        }
+
+        public void setPrev(CircularNode<E> prev) {
+            prevElement = prev;
         }
 
         public E getValue() {

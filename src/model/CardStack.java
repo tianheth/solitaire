@@ -9,7 +9,7 @@ import model.list.SinglyStack;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
  */
 public class CardStack extends SinglyStack<Card> {
 

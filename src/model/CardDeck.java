@@ -10,27 +10,31 @@ import model.list.CircularNode;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
  */
-public class CardDeck extends CircularList<Card> {
-//    private Card curCard;
+public class CardDeck {
 
-    private CircularNode<Card> curCardNode;
+    private Card curCard;
+    private CircularList<Card> cards;
 
     /**
-     * Open the next card, if this is the tail card, return the first card
+     * Open the next card, set it as the current card if current card is the
+     * last card, return the first card
      *
-     * @return
+     * @return the updated current card
      */
+    public CardDeck() {
+        cards = new CircularList<>();
+    }
+
     public Card drawCard() {
-//        int i = indexOf(curCard);
-//        if (i == 0) {
-//            curCard = get(size() - 1);
-//        } else {
-//            curCard = get(i - 1);
-//        }
-        Card curCard = curCardNode.value();
-        curCardNode = curCardNode.prev();
+        int i = cards.indexOf(curCard);
+        if (i == 0) {
+            i = cards.size() - 1;
+        } else {
+            i--;
+        }
+        curCard = cards.get(i);
         return curCard;
     }
 
@@ -41,34 +45,61 @@ public class CardDeck extends CircularList<Card> {
      * @return the deleted card
      */
     public Card takeCard() {
-        Card card = curCardNode.value();
-
-        CircularNode<Card> node = curCardNode;
-        if (curCardNode == tail.next()) {
-            curCardNode = curCardNode.prev();
+        Card takenCard = curCard;
+//        curCard = drawCard();
+        int i = cards.indexOf(curCard);
+        int size = cards.size();
+        cards.remove(takenCard);
+        if (cards.isEmpty()) {
+            curCard = null;
         } else {
-            curCardNode = curCardNode.next();
+            if (i == size - 1) {
+                i--;
+            }
+            curCard = cards.get(i);
         }
-        remove(node);
-        if (isEmpty()) {
-            curCardNode = null;
-        }
-        return card;
+        return takenCard;
     }
 
     public void setCurCard(int cardIndex) {
-        curCardNode = getNode(cardIndex);
+        curCard = cards.get(cardIndex);
     }
 
     public Card getCurCard() {
-        if (curCardNode == null) {
+        return curCard;
+    }
+
+    public Card getPrevCard() {
+        if (curCard == null || (cards.size() < 2)) {
             return null;
         } else {
-            return curCardNode.value();
+            int i = cards.indexOf(curCard);
+            if (i == cards.size() - 1) {
+                i = 0;
+            } else {
+                i = i + 1;
+            }
+            return cards.get(i);
         }
     }
 
     public boolean isFirst() {
-        return curCardNode == tail.next().next();
+        return cards.indexOf(curCard) == 0;
+    }
+
+    public void add(Card card) {
+        cards.add(card);
+    }
+
+    public boolean isEmpty() {
+        return cards.isEmpty();
+    }
+
+    public int size() {
+        return cards.size();
+    }
+
+    public Object get(int i) {
+        return cards.get(i);
     }
 }

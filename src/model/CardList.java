@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package model;
 
 import model.list.CircularList;
@@ -10,30 +5,29 @@ import model.list.CircularNode;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
  */
-public class CardList extends CircularList<Card> {
+public class CardList {
 
+    private CircularList<Card> cards;
     private Card tailCard;
     private int openIndex;
 
     public CardList() {
-        super();
+        cards = new CircularList<Card>();
         tailCard = null;
         openIndex = -1;
     }
 
     /**
-     * create a card list with at least 1 card
+     * create a card list
      *
-     * @param tailNode
-     * @param nodeCount
-     * @param tailCard
-     * @param openIndex
+     * @param cards the card list inside
+     * @param openIndex the open index of the card list
      */
-    private CardList(CircularNode<Card> tailNode, int nodeCount, int openIndex) {
-        super(tailNode, nodeCount);
-        this.tailCard = tailNode.next().value();
+    private CardList(CircularList<Card> cards, int openIndex) {
+        this.cards = cards;
+        this.tailCard = cards.get(cards.size() - 1);
         this.openIndex = openIndex;
     }
 
@@ -52,76 +46,67 @@ public class CardList extends CircularList<Card> {
      * @param index >=0 and &lt nodeCount
      * @return the second list
      */
-    public CardList cut(int index) {
-        CardList list2;
+    public CardList cut(Card card) {
+        CardList cutList;
+        int index = cards.indexOf(card);
 
         if (index == 0) {
-            list2 = new CardList(tail, size(), openIndex);
+            CircularList<Card> cards2 = new CircularList<>();
+            cards2.setTail(cards.getTail());
+            cards2.setSize(cards.size());
+            cutList = new CardList(cards2, openIndex);
             // initiate the list 1 since it's empty now
-            tail = null;
-            nodeCount = 0;
+            cards = new CircularList<Card>();
             tailCard = null;
             openIndex = -1;
         } else {
-            CircularNode<Card> tailNode_L2 = new CircularNode<Card>(null, null, null);
-
-            CircularNode<Card> tailCard_L2 = tail.next();
-            CircularNode<Card> headCard_L1 = tailCard_L2.next();
-
-            CircularNode<Card> headCard_L2 = getNode(index);
-            CircularNode<Card> tailCard_L1 = headCard_L2.prev();
-
-            // reset links for list 1
-            headCard_L1.setPrev(tailCard_L1);
-            tailCard_L1.setNext(headCard_L1);
-            tail.setNext(tailCard_L1);
-
-            // reset links for list 2
-            headCard_L2.setPrev(tailCard_L2);
-            tailCard_L2.setNext(headCard_L2);
-            tailNode_L2.setNext(tailCard_L2);
-
             // set the tailCard and openIndex
-            list2 = new CardList(tailNode_L2, size() - index, 0);
-            tailCard = tailCard_L1.value();
-            tail.setNext(tailCard_L1);
-            nodeCount = index;
+            CircularNode<Card> remainListTail = cards.getNode(index - 1);
+            CircularNode<Card> remainListHead = cards.getHead();
+
+            CircularNode<Card> cutListHead = cards.getNode(index);
+            CircularNode<Card> cutListTail = cards.getTail();
+
+            CircularList<Card> cards2 = new CircularList<>();
+            cards2.setTail(cutListTail);
+            cards2.setSize(cards.size() - index);
+            cards2.getTail().setNext(cutListHead);
+            cutList = new CardList(cards2, 0);
+
+            remainListTail.setNext(remainListHead);
+            cards.setTail(remainListTail);
+            cards.setSize(index);
+            tailCard = remainListTail.getValue();
 
             if (openIndex == index) {
                 openIndex--;
             }
         }
-        return list2;
+        return cutList;
     }
 
     /**
      * Join this list to the tail of the other list, if the rules allow this;
      * have to check the rules before calling this method; the first card of
-     * this list is 'ABOVE' the tail card of the other list
+     * this list is 'ABOVE' the tail card of the other listtargetList
      *
-     * @param list1 the list that linked to, this list would be list2
+     * @param targetList the list that linked to
      */
-    public void link(CardList list1) {
-        if (!list1.isEmpty()) {
-            CircularNode<Card> tailCard_L1 = list1.getTailNode().next();
-            CircularNode<Card> headCard_L1 = tailCard_L1.next();
-            CircularNode<Card> tailCard_L2 = tail.next();
-            CircularNode<Card> headCard_L2 = tailCard_L2.next();
+    public void link(CardList targetList) {
+        CircularNode headNode = targetList.getHeadNode();
 
-            // reset links for the list 1
-            tailCard_L1.setNext(headCard_L2);
-            headCard_L1.setPrev(tailCard_L2);
+        CircularList<Card> targetCards = new CircularList<>();
+        targetCards.setTail(cards.getTail());
+        targetCards.setSize(cards.size() + targetList.size());
 
-            // reset links for the list 2
-            tailCard_L2.setNext(headCard_L1);
-            headCard_L2.setPrev(tailCard_L1);
+        if (targetList.isEmpty()) {
+            targetList.setOpenIndex(0);
+        } else {
+            targetList.getTailNode().setNext(cards.getHead());
+            targetCards.getTail().setNext(headNode);
         }
-        else
-            list1.setOpenIndex(0);
-
-        list1.setTailCard((Card) tail.next().value());
-        list1.setTailNode(tail);
-        list1.setSize(list1.size() + size());
+        targetList.setTailCard(tailCard);
+        targetList.setCards(targetCards);
     }
 
     /**
@@ -129,9 +114,8 @@ public class CardList extends CircularList<Card> {
      *
      * @param newCard
      */
-    @Override
     public void add(Card newCard) {
-        add(size(), newCard);
+        cards.add(newCard);
         tailCard = newCard;
         if (openIndex < 0) {
             openIndex = 0;
@@ -144,16 +128,19 @@ public class CardList extends CircularList<Card> {
      *
      * @return the old tail card
      */
-    public Card moveTail() {
-        if (size() > 1) {
-            tailCard = get(size() - 2);
-        } else {
-            tailCard = null;
-        }
-        if (openIndex == size() - 1) {
+    public Card takeTail() {
+        Card takenCard = tailCard;
+        if (openIndex == cards.size() - 1) {
             openIndex--;
         }
-        return remove(size() - 1);
+        cards.removeTail();
+        if (cards.size() > 0) {
+            tailCard = cards.getTail().getValue();
+        } else {
+            tailCard = null;
+            cards=new CircularList<Card>();
+        }
+        return takenCard;
     }
 
     /**
@@ -168,13 +155,13 @@ public class CardList extends CircularList<Card> {
         }
 
         int nodeIndex = openIndex;
-        CircularNode<Card> finger = getNode(nodeIndex);
-        while (nodeIndex < nodeCount) {
-            Card card = finger.value();
+        CircularNode<Card> finger = cards.getNode(nodeIndex);
+        while (nodeIndex < cards.size()) {
+            Card card = finger.getValue();
             if (card.getIndex() == cardIndex) {
                 return card;
             } else {
-                finger = finger.next();
+                finger = finger.getNext();
                 nodeIndex++;
             }
         }
@@ -186,7 +173,36 @@ public class CardList extends CircularList<Card> {
         openIndex = i;
     }
 
-    private void setTailCard(Card tailCard) {
+    public void setTailCard(Card tailCard) {
         this.tailCard = tailCard;
     }
+
+    public boolean isEmpty() {
+        return cards.isEmpty();
+    }
+
+    public void setCards(CircularList<Card> cards) {
+        this.cards = cards;
+    }
+
+    public int size() {
+        if (cards == null) {
+            return 0;
+        } else {
+            return cards.size();
+        }
+    }
+
+    public Card get(int i) {
+        return cards.get(i);
+    }
+
+    public CircularNode<Card> getTailNode() {
+        return cards.getTail();
+    }
+
+    public CircularNode<Card> getHeadNode() {
+        return cards.getHead();
+    }
+
 }

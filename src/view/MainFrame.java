@@ -39,7 +39,7 @@ import model.*;
 
 /**
  *
- * @author Alan Tian <alan.tian at aut.ac.nz>
+ * @author Alan Tian 1302662
  */
 public class MainFrame extends JFrame implements ActionListener, MouseListener {
 
@@ -53,6 +53,7 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
     private JLayeredPane pnlDesk = new JLayeredPane();
     private JLabel lblDeck = new JLabel();
     private CardLabel lblDeckCur;
+    private CardLabel lblDeckPrev;
 //    private CardLabel lblDeckPre = new CardLabel();
     private JLabel[] lblStack = new JLabel[4];
 
@@ -143,7 +144,14 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
         recDeck.x += dimCard.width + dimSpan.width;
         lblDeckCur.setBounds(recDeck);
         lblDeckCur.setVisible(!game.deck.isEmpty());
-        pnlDesk.add(lblDeckCur);
+        Card deckPrevCard = game.deck.getPrevCard();
+        if (deckPrevCard != null) {
+            lblDeckPrev = new CardLabel(deckPrevCard, this, game);
+            lblDeckPrev.setBounds(recDeck);
+            lblDeckPrev.setVisible(true);
+            pnlDesk.add(lblDeckPrev, new Integer(0));
+        }
+        pnlDesk.add(lblDeckCur, new Integer(1));
 
         String deckCardName;
         if (game.deck.isEmpty() || game.deck.isFirst()) {
@@ -214,9 +222,9 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
     }
 
     public static int mapListArea(Point p) {
-        int yPos = dimSpan.height * 2 + dimCard.height;
+        int yPos = dimSpan.height * 2 + dimCard.height / 2;
         if (p.y >= yPos) {
-            return p.x / (dimCard.width + dimSpan.width) % 7;
+            return (p.x + dimCard.width / 2) / (dimCard.width + dimSpan.width) % 7;
         } else {
             return -1;
         }
@@ -228,6 +236,7 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
             game.initSolitaire();
 //            showGameWin();
             showGame();
+//            clearDesk();
         }
     }
 
@@ -266,7 +275,8 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
             Point loc = lblStack[s].getLocation();
             if (loc.y > dimFrame.height) {
                 animationTimer.stop();
-//                showGame();
+                game.initSolitaire();
+                showGame();
             } else {
                 loc.x -= Math.random() * 20 * s - 5;
                 loc.y += 10;
@@ -277,21 +287,33 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
 
     private Timer animationTimer;
 
-    void showGameWin() {
-        class showGameWinActionListener implements ActionListener {
+    class showGameWinActionListener implements ActionListener {
 
-            MainFrame frame;
+        MainFrame frame;
 
-            public showGameWinActionListener(MainFrame frame) {
-                this.frame = frame;
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.moveStack();
-            }
+        public showGameWinActionListener(MainFrame frame) {
+            this.frame = frame;
         }
 
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            frame.moveStack();
+        }
+    }
+
+    void clearDesk() {
+        Component[] cs = pnlDesk.getComponents();
+        for (Component c : cs) {
+            int iList = mapListArea(c.getLocation());
+            if (Solitaire.validListIndex(iList)) {
+                pnlDesk.remove(c);
+            }
+        }
+        repaint();
+    }
+
+    void showGameWin() {
+        clearDesk();
         ActionListener al = new showGameWinActionListener(this);
         animationTimer = new Timer(30, al);
         animationTimer.setRepeats(true);

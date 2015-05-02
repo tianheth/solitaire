@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 
 /**
  *
- * @author Alan Tian <alan.tian at aut.ac.nz>
+ * @author Alan Tian 1302662
  */
 public class ImagePanel extends JPanel {
 

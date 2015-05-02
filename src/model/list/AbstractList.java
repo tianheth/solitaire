@@ -7,7 +7,7 @@ package model.list;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
  */
 public interface AbstractList<E> {
 

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import model.Card;
@@ -13,7 +8,18 @@ import view.MainFrame;
 
 /**
  *
- * @author cvg2836
+ * @author Alan Tian 1302662
+ * 
+ * contribution: finished alone
+ * extension: 
+ *  1 there is an animation when game win
+ *  2 the GUI is simular to a common windows solitaire game:
+ *      2.1 drag and drop operations on card from deck and list
+ *      2.2 double click on current card of deck to stack
+ *      2.3 double click on current card on list to stack
+ *  3 singly linked list for stack
+ *  4 circularly linked list for deck
+ *  5 doubly linked list for card list
  */
 public class Solitaire {
 
@@ -70,7 +76,6 @@ public class Solitaire {
         }
 
         int c = 0;
-
         for (int i = 0; i < LIST_NUM; i++) {
             for (int j = 0; j < i + 1; j++) {
                 lists[i].add(cardSet[c]);
@@ -82,7 +87,7 @@ public class Solitaire {
         for (int i = c; i < cardSet.length; i++) {
             deck.add(cardSet[i]);
         }
-        deck.setCurCard(deck.size() - 1);
+        deck.setCurCard(deck.size()-1);
     }
 
     /* Rearranges an array of objects in uniformly random order
@@ -158,7 +163,7 @@ public class Solitaire {
                 Card tailCard = targetList.getTailCard();
                 // check if linkable 
                 if (tailCard == null || card.compareTo(tailCard) == Card.ABOVE) {
-                    CardList newList = list.cut(list.indexOf(card));
+                    CardList newList = list.cut(card);
                     newList.link(targetList);
                     return true;
                 } else {
@@ -190,7 +195,7 @@ public class Solitaire {
                 CardStack stack = stacks[card.getSuit() - 1];
                 if (stack.isAddable(card)) {
                     stack.add(card);
-                    lists[listIndex].moveTail();
+                    lists[listIndex].takeTail();
                     return true;
                 } else {
                     return false;
@@ -202,12 +207,37 @@ public class Solitaire {
     }
 
     public boolean isGameWin() {
-        for (int s = 0; s < stacks.length; s++) {
-            if (stacks[s].size() != Card.SUIT_SIZE) {
-                return false;
+//        for (int s = 0; s < stacks.length; s++) {
+//            if (stacks[s].size() != Card.SUIT_SIZE) {
+//                return false;
+//            }
+//        }
+//        if (!deck.isEmpty()) {
+//            return false;
+//        } else {
+            for (int l = 0; l < LIST_NUM; l++) {
+                if (lists[l].getOpenIndex() > 0) {
+                    return false;
+                }
+            }
+  //      }
+        
+//        Card nextCard = findSendableCard();
+//        if(nextCard!=null)
+//        send(nextCard.getIndex());
+        return true;
+    }
+
+    public Card findSendableCard() {
+        Card nextCard = null;
+        for (int l = 0; l < LIST_NUM; l++) {
+            nextCard = lists[l].getTailCard();
+            CardStack stack = stacks[nextCard.getSuit() - 1];
+            if (stack.isAddable(nextCard)) {
+                return nextCard;
             }
         }
-        return true;
+        return nextCard;
     }
 
     /**

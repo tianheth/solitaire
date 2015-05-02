@@ -7,7 +7,7 @@ package model.list;
 
 /**
  *
- * @author cvg2836
+ * @author Alan Tian 1302662
  */
 public class SinglyList<E> implements AbstractList<E> {
 
@@ -22,10 +22,10 @@ public class SinglyList<E> implements AbstractList<E> {
     protected SinglyNode<E> locate(int i) {
         SinglyNode<E> currentNode = head;
         while (i > 0) {
-            currentNode = currentNode.next();
+            currentNode = currentNode.getNext();
             i--;
         }
-        return currentNode.next();
+        return currentNode.getNext();
     }
 
     @Override
@@ -33,10 +33,10 @@ public class SinglyList<E> implements AbstractList<E> {
         SinglyNode<E> finger = head;
         int index = -1;
         while (finger != null) {
-            if (finger.value() == e) {
+            if (finger.getValue() == e) {
                 break;
             } else {
-                finger = finger.next();
+                finger = finger.getNext();
                 index++;
             }
         }
@@ -62,7 +62,7 @@ public class SinglyList<E> implements AbstractList<E> {
         if (i < 0 || i > nodeCount) {
             return null;
         } else {
-            return (E) locate(i).value();
+            return (E) locate(i).getValue();
         }
     }
 
@@ -94,7 +94,7 @@ public class SinglyList<E> implements AbstractList<E> {
                     head.setNext(newNode);
                 } else {
                     SinglyNode<E> prevNode = locate(i - 1);
-                    SinglyNode<E> newNode = new SinglyNode<E>(e, prevNode.next());
+                    SinglyNode<E> newNode = new SinglyNode<E>(e, prevNode.getNext());
                     prevNode.setNext(newNode);
                 }
             }
@@ -107,10 +107,10 @@ public class SinglyList<E> implements AbstractList<E> {
     public boolean contains(E e) {
         SinglyNode<E> finger = head;
         while (finger != null) {
-            if (finger.value() == e) {
+            if (finger.getValue() == e) {
                 return true;
             } else {
-                finger = finger.next();
+                finger = finger.getNext();
             }
         }
         return false;

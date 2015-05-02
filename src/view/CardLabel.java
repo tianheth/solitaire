@@ -21,9 +21,10 @@ import model.Card;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
  */
 public class CardLabel extends JLabel implements MouseListener, MouseMotionListener {
+
     private Card card;
     private CardLabel next = null;
     private JLayeredPane pane;
@@ -33,7 +34,7 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
     private boolean isVisible = false;
     private Dimension dimCard;
     private boolean fromDeck = false;
-    
+
     private Solitaire game;
     private MainFrame mainFrame;
 
@@ -62,14 +63,16 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {
             boolean moved = false;
-            if(fromDeck)
+            if (fromDeck) {
                 moved = game.deckTo();
-            else
+            } else {
                 moved = game.send(card.getIndex());
-            if(moved){
+            }
+            if (moved) {
                 mainFrame.showGame();
-                if (game.isGameWin())
+                if (game.isGameWin()) {
                     mainFrame.showGameWin();
+                }
             }
         }
 //        System.out.println(card.toString());
@@ -111,8 +114,9 @@ public class CardLabel extends JLabel implements MouseListener, MouseMotionListe
 
         if (linkSuccess) {
             mainFrame.showGame();
-//            setCardsLocation(location, pane.getLayer(tail));
-//            tail.setNext(this);
+            if (game.isGameWin()) {
+                mainFrame.showGameWin();
+            }
         } else {
             setCardsLocation(origLocation, origLayer);
         }

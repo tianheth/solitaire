@@ -27,6 +27,8 @@ public class GameTest {
     
     Solitaire game;
     Card[] cardSet;
+    Card[] cards = new Card[4];
+
     public GameTest() {
         game = new Solitaire();
 
@@ -92,11 +94,16 @@ public class GameTest {
     public void testCardListCut() {
         insertOrderCards();
         CardList list = new CardList();
-        list.add(new Card(Card.mapCardName("S_1")));
-        list.add(new Card(Card.mapCardName("S_2")));
-        list.add(new Card(Card.mapCardName("S_3")));
-        list.add(new Card(Card.mapCardName("S_4")));
-        list.cut(0);
+        cards[0] = new Card(Card.mapCardName("S_1"));
+        cards[1] = new Card(Card.mapCardName("S_2"));
+        cards[2] = new Card(Card.mapCardName("S_3"));
+        cards[3] = new Card(Card.mapCardName("S_4"));
+
+        list.add(cards[0]);
+        list.add(cards[1]);
+        list.add(cards[2]);
+        list.add(cards[3]);
+        list.cut(cards[0]);
     }
     
     @Test
@@ -151,11 +158,11 @@ public class GameTest {
 //        cui.executeCommand("link C_2 2");
 //        cui.showGame();
         
-        game.lists[1].set(game.lists[1].size()-1, new Card(Card.mapCardName("S_1")));
-        cui.executeCommand("link S_1 7");
+//        game.lists[1].set(game.lists[1].size()-1, new Card(Card.mapCardName("S_1")));
+//        cui.executeCommand("link S_1 7");
 //        game.lists[1].set(game.lists[1].size()-1, new Card(40));
 //        cui.executeCommand("link S_1 7");
-        cui.showGame();
+//        cui.showGame();
 //        assertEquals(GameCui.ERR_INVALID_LIST+"\n", outContent);
     }    
 }

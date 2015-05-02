@@ -16,7 +16,7 @@ import model.CardStack;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
  */
 public class GameCui {
 
@@ -263,7 +263,7 @@ public class GameCui {
                     return false;
                 }
                 stack.add(card);
-                game.lists[listIndex].moveTail();
+                game.lists[listIndex].takeTail();
                 return true;
             }
         }

@@ -5,9 +5,12 @@
         <group>
             <file>file:/C:/Users/Alan/Documents/GitHub/solitaire/src/model/list/CircularList.java</file>
             <file>file:/C:/Users/Alan/Documents/GitHub/solitaire/src/view/CardLabel.java</file>
+            <file>file:/C:/Users/Alan/Documents/GitHub/solitaire/test/model/CardDeckTest.java</file>
+            <file>file:/C:/Users/Alan/Documents/GitHub/solitaire/src/model/CardDeck.java</file>
             <file>file:/C:/Users/Alan/Documents/GitHub/solitaire/src/view/MainFrame.java</file>
             <file>file:/C:/Users/Alan/Documents/GitHub/solitaire/src/controller/Solitaire.java</file>
             <file>file:/C:/Users/Alan/Documents/GitHub/solitaire/src/model/CardList.java</file>
+            <file>file:/C:/Users/Alan/Documents/GitHub/solitaire/src/model/Card.java</file>
         </group>
     </open-files>
 </project-private>

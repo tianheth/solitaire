@@ -2,7 +2,7 @@ package model;
 
 /**
  *
- * @author Alan Tian 
+ * @author Alan Tian 1302662
  * @version 1.0.0 2014.8
  */
 

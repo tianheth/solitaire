@@ -9,7 +9,7 @@ import model.Card;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
  */
 public class CircularList<E> implements AbstractList<E> {
 
@@ -26,7 +26,7 @@ public class CircularList<E> implements AbstractList<E> {
         this.nodeCount = nodeCount;
     }
 
-    public CircularNode<E> getTailNode() {
+    public CircularNode<E> getTail() {
         return tail;
     }
 
@@ -34,16 +34,24 @@ public class CircularList<E> implements AbstractList<E> {
         this.nodeCount = nodeCount;
     }
 
-    public CircularNode<E> getNode(int i) {
-        if (i < 0 || i >= nodeCount) {
+    public CircularNode<E> getHead() {
+        if (tail != null) {
+            return tail.getNext();
+        } else {
             return null;
         }
-        CircularNode<E> currentNode = tail.next();
+    }
+
+    public CircularNode<E> getNode(int i) {
+        if (i < 0 || i >= nodeCount || tail == null) {
+            return null;
+        }
+        CircularNode<E> curNode = tail;
         while (i > 0) {
-            currentNode = currentNode.next();
+            curNode = curNode.getNext();
             i--;
         }
-        return currentNode.next();
+        return curNode.getNext();
     }
 
     @Override
@@ -51,13 +59,13 @@ public class CircularList<E> implements AbstractList<E> {
         if (tail == null) {
             return -1;
         } else {
-            CircularNode<E> finger = getHead();
+            CircularNode<E> finger = tail.getNext();
             int index = 0;
             while (index < nodeCount) {
-                if (finger.value() == e) {
+                if (finger.getValue() == e) {
                     return index;
                 } else {
-                    finger = finger.next();
+                    finger = finger.getNext();
                     index++;
                 }
             }
@@ -80,7 +88,7 @@ public class CircularList<E> implements AbstractList<E> {
         if (i < 0 || i >= nodeCount) {
             return null;
         } else {
-            return (E) getNode(i).value();
+            return (E) getNode(i).getValue();
         }
     }
 
@@ -103,22 +111,24 @@ public class CircularList<E> implements AbstractList<E> {
                 if (i > 0) {
                     return false;
                 } else {
-                    CircularNode<E> newNode = new CircularNode<E>(e, null, null);
+                    CircularNode<E> newNode = new CircularNode<E>(e, null);
                     newNode.setNext(newNode);
-                    newNode.setPrev(newNode);
-                    tail = new CircularNode<E>(null, null, newNode);
+                    tail = newNode;
                 }
             } else {
                 if (i < nodeCount) {
-                    CircularNode<E> finger = getNode(i);
-                    CircularNode<E> newNode = new CircularNode<E>(e, finger.prev(), finger);
-                    finger.prev().setNext(newNode);
-                    finger.setPrev(newNode);
+                    CircularNode<E> prev;
+                    prev = tail;
+                    while (i > 0) {
+                        prev = prev.getNext();
+                        i--;
+                    }
+                    CircularNode<E> newNode = new CircularNode<E>(e, prev.getNext());
+                    prev.setNext(newNode);
                 } else {
-                    CircularNode<E> newNode = new CircularNode<E>(e, tail.next(), getHead());
-                    getHead().setPrev(newNode);
-                    tail.next().setNext(newNode);
+                    CircularNode<E> newNode = new CircularNode<E>(e, tail.getNext());
                     tail.setNext(newNode);
+                    tail = newNode;
                 }
             }
             nodeCount++;
@@ -129,45 +139,31 @@ public class CircularList<E> implements AbstractList<E> {
     @Override
     public boolean contains(E e) {
         CircularNode<E> finger = tail;
-        while (finger != null) {
-            if (finger.value() == e) {
+        int i = 0;
+        while (i < nodeCount) {
+            if (finger.getValue() == e) {
                 return true;
             } else {
-                finger = finger.prev();
+                finger = finger.getNext();
             }
+            i++;
         }
         return false;
     }
 
-    protected CircularNode<E> getHead() {
-        if (nodeCount > 0) {
-            return tail.next().next();
-        } else {
-            return null;
-        }
-    }
-    
-    protected void remove(CircularNode<E> node){
-        if(nodeCount == 1)
-            tail = null;
-        else{
-            node.prev().setNext(node.next());
-            node.next().setPrev(node.prev());
-            if (node == tail.next())
-                tail.setNext(node.prev());
-        }
-        nodeCount--;
-    }
-
     @Override
     public E remove(E e) {
-        CircularNode<E> finger = getHead();
+        if (tail == null) {
+            return null;
+        }
+
+        CircularNode<E> finger = tail;
         int index = 0;
         while (index < nodeCount) {
-            if (finger.value() == e) {
+            if (finger.getNext().getValue() == e) {
                 break;
             } else {
-                finger = finger.next();
+                finger = finger.getNext();
                 index++;
             }
         }
@@ -179,27 +175,48 @@ public class CircularList<E> implements AbstractList<E> {
         if (nodeCount == 0) {
             tail = null;
         } else {
-            finger.prev().setNext(finger.next());
-            finger.next().setPrev(finger.prev());
+            finger.setNext(finger.getNext().getNext());
         }
         return e;
     }
 
+    public E removeTail(){
+        if(tail == null)
+            return null;
+        E e = (E) tail.getValue();
+        nodeCount--;
+        if(nodeCount>0){
+            CircularNode<E> head = tail.getNext();
+            tail = getNode(nodeCount-1);
+            tail.setNext(head);
+        }
+        else
+            tail = null;
+        return e;
+    }
     @Override
     public E remove(int i) {
         if (i < 0 || i >= nodeCount) {
             return null;
         }
-        CircularNode<E> finger = getNode(i);
-        E e = finger.value();
-        if (nodeCount > 1) {
-            tail.setNext(finger.prev());
-            finger.prev().setNext(finger.next());
-            finger.next().setPrev(finger.prev());
+        E e;
+        CircularNode<E> finger = tail;
+        if (i == nodeCount - 1) {
+            e = finger.getValue();
         } else {
-            tail = null;
+            while (i > 0) {
+                finger = finger.getNext();
+                i--;
+            }
+            e = finger.getNext().getValue();
         }
         nodeCount--;
+        if (nodeCount == 0) {
+            tail = null;
+        } else {
+            finger.setNext(finger.getNext().getNext());
+            tail = getNode(nodeCount-1);
+        }
         return e;
     }
 
@@ -207,7 +224,7 @@ public class CircularList<E> implements AbstractList<E> {
         add(nodeCount, e);
     }
 
-    public void setTailNode(CircularNode tail) {
+    public void setTail(CircularNode tail) {
         this.tail = tail;
     }
 }

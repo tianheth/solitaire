@@ -7,7 +7,7 @@ package model.list;
 
 /**
  *
- * @author cvg2836
+ * @author Alan Tian 1302662
  */
 public class SinglyNode<E> {
 
@@ -19,7 +19,7 @@ public class SinglyNode<E> {
             nextElement = next;
         }
 
-        public SinglyNode<E> next() {
+        public SinglyNode<E> getNext() {
             return nextElement;
         }
 
@@ -27,7 +27,7 @@ public class SinglyNode<E> {
             nextElement = next;
         }
 
-        public E value() {
+        public E getValue() {
             return data;
         }
 

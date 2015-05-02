@@ -49,14 +49,14 @@ public class CardDeckTest {
         assertEquals("D_4", deck.getCurCard().toString());
 
         Card card = deck.drawCard();
-        assertEquals("D_4", card.toString());
+        assertEquals("D_3", card.toString());
 
         deck.drawCard();
         deck.drawCard();
         card= deck.drawCard();
-        assertEquals("D_1", card.toString());
-        card= deck.drawCard();
         assertEquals("D_4", card.toString());
+        card= deck.drawCard();
+        assertEquals("D_3", card.toString());
     }
 
     @Test
@@ -64,11 +64,12 @@ public class CardDeckTest {
         assertEquals(4, deck.size());
         Card card = deck.takeCard();
         assertEquals("D_4", card.toString());
+        assertEquals("D_3", deck.getCurCard().toString());
         deck.drawCard();
         card = deck.takeCard();
         assertEquals("D_2", card.toString());
         card= deck.drawCard();
-        assertEquals("D_3", card.toString());
+        assertEquals("D_1", card.toString());
         card = deck.takeCard();
         assertEquals("D_1", card.toString());
         assertEquals("D_3", deck.getCurCard().toString());
