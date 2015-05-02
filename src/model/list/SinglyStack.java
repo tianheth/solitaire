@@ -7,36 +7,41 @@ package model.list;
 
 /**
  *
- * @author Alan Tian
+ * @author Alan Tian 1302662
+ * 
+ * @param <E> generic element in the stack
  */
-public class SinglyStack<E> extends SinglyList<E> {
+public class SinglyStack<E> extends SinglyList<E> implements Stack<E>{
 
-    public void push(E e) {
-        add(nodeCount, e);
-    }
-
+    @Override
     public E peek() {
         if (nodeCount == 0) {
             return null;
         } else {
-            return locate(nodeCount - 1).value();
+            return get(nodeCount - 1);
         }
     }
 
+    @Override
     public E pop() {
         if (nodeCount == 0) {
             return null;
         } else {
             if (nodeCount == 1) {
-                E e = (E) head.next().value();
+                E e = (E) head.getNext().getValue();
                 head.setNext(null);
                 return e;
             } else {
                 SinglyNode<E> preNode = locate(nodeCount - 2);
-                E e = preNode.next().value();
+                E e = preNode.getNext().getValue();
                 preNode.setNext(null);
                 return e;
             }
         }
+    }
+
+    @Override
+    public void push(E e) {
+        add(nodeCount, e);
     }
 }
