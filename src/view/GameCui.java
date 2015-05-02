@@ -39,49 +39,88 @@ public class GameCui {
     }
 
     public void startGame() {
-        output.println("  ---  Welcome to Solitaire Game  ---");
+        showOrigGame();
         String cmd = "";
         while (cmd.compareTo("quit") != 0) {
             showGame();
+            output.println("\n[DrawCard], [DeckTo <list num>], [Link <card> <list num>], [Send <Card>], [Restart], [Quit]");
             output.print("Your next move: ");
             cmd = input.next().toLowerCase();
-//            output.println(cmd);
-            if (executeCommand(cmd)) {
+            int result = executeCommand(cmd);
+            if (result == 1) {
                 output.println("success");
-            } else {
+                if (game.isGameWin()) {
+                    output.println("game win!");
+                    game.initSolitaire();
+                    showOrigGame();
+                }
+            } else if (result == -1) {
                 output.println("failed");
             }
         }
     }
 
-    public boolean executeCommand(String command) {
-        boolean result = false;
+    public int executeCommand(String command) {
+        int result = 0;
         String[] cmd = command.split(" ");
         if (cmd[0].compareTo("drawcard") == 0) {
-
-            result = drawCard();
+            if (drawCard()) {
+                result = 1;
+            } else {
+                result = -1;
+            }
         } else if (cmd[0].compareTo("deckto") == 0) {
-            result = deckTo(cmd);
+            if (deckTo(cmd)) {
+                result = 1;
+            } else {
+                result = -1;
+            }
         } else if (cmd[0].compareTo("link") == 0) {
-            result = link(cmd);
+            if (link(cmd)) {
+                result = 1;
+            } else {
+                result = -1;
+            }
         } else if (cmd[0].compareTo("send") == 0) {
-            result = send(cmd);
+            if (send(cmd)) {
+                result = 1;
+            } else {
+                result = -1;
+            }
         } else if (cmd[0].compareTo("restart") == 0) {
             game.initSolitaire();
-            result = true;
+            showOrigGame();
         } else if (cmd[0].compareTo("quit") != 0) {
             output.println(ERR_INVALID_CMD);
+        } else {
+            output.println("unknown command");
+            result = -1;
         }
         return result;
     }
 
-    public void showGame() {
-        showCardListAll();
+    public void showOrigGame(){
+        output.println("\n\n  ---  Welcome to Solitaire Game  ---");
+        output.println("  ---  Original Game Infor ---");
+        showList(true);
         showCardDeckAll();
-
+    }
+    
+    public void showGame() {
+        output.println("  ---  Current Game Infor ---");
         showDeck();
         showStack();
-        showList();
+        showList(false);
+    }
+
+    public void showCardDeckAll() {
+        String deckCards = "";
+        CardDeck deck = game.deck;
+        for (int i = 0; i < deck.size(); i++) {
+            deckCards += deck.get(i).toString() + " ";
+        }
+        output.println("deck: \n" + deckCards);
+        output.println();
     }
 
     private void showDeck() {
@@ -107,35 +146,30 @@ public class GameCui {
         output.println("Card Stack: " + stackCards);
     }
 
-    private void showList() {
+    /**
+     * show card lists
+     *
+     * @param showClose show the closed cards as open or not
+     */
+    private void showList(boolean showClose) {
         output.println("Card Lists: ");
         CardList list;
         for (int i = 0; i < Solitaire.LIST_NUM; i++) {
             String listCards = "";
             list = game.lists[i];
             for (int j = 0; j < list.size(); j++) {
-                if (j >= list.getOpenIndex()) {
-                    listCards += list.get(j).toString() + " ";
+                if (!showClose) {
+                    if (j >= list.getOpenIndex()) {
+                        listCards += list.get(j).toString() + " ";
+                    } else {
+                        listCards += "Back ";
+                    }
                 } else {
-                    listCards += "Back ";
+                    listCards += list.get(j).toString() + " ";
                 }
             }
             output.println((i + 1) + ": " + listCards);
         }
-    }
-
-    public void showCardListAll() {
-        output.println("Card Lists: ");
-        CardList list;
-        for (int i = 0; i < Solitaire.LIST_NUM; i++) {
-            String listCards = "";
-            list = game.lists[i];
-            for (int j = 0; j < list.size(); j++) {
-                listCards += list.get(j).toString() + " ";
-            }
-            output.println((i + 1) + ": " + listCards);
-        }
-        output.println();
     }
 
     public void showCardSet(Card[] cardSet) {
@@ -147,16 +181,6 @@ public class GameCui {
             }
             output.println(cards13);
         }
-        output.println();
-    }
-
-    public void showCardDeckAll() {
-        String deckCards = "";
-        CardDeck deck = game.deck;
-        for (int i = 0; i < deck.size(); i++) {
-            deckCards += deck.get(i).toString() + " ";
-        }
-        output.println("deck: " + deckCards);
         output.println();
     }
 
@@ -181,7 +205,7 @@ public class GameCui {
             output.println(ERR_INVALID_CMD);
             return false;
         } else {
-            int listIndex = Integer.valueOf(cmd[1])-1;
+            int listIndex = Integer.valueOf(cmd[1]) - 1;
             if (!validListIndex(listIndex)) {
                 return false;
             } else if (!game.deckTo(listIndex)) {
@@ -207,7 +231,7 @@ public class GameCui {
             return false;
         }
 
-        int listIndex = Integer.valueOf(cmd[2])-1;
+        int listIndex = Integer.valueOf(cmd[2]) - 1;
         if (!validListIndex(listIndex)) {
             return false;
         }

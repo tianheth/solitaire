@@ -102,4 +102,8 @@ public class CardDeck {
     public Object get(int i) {
         return cards.get(i);
     }
+
+    public boolean isLast() {
+        return cards.indexOf(curCard) == cards.size()-1;
+    }
 }

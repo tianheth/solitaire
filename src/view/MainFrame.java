@@ -2,11 +2,9 @@ package view;
 
 import controller.Solitaire;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -15,26 +13,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import static java.lang.Thread.sleep;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.Timer;
-import javax.swing.border.TitledBorder;
 import model.*;
 
 /**
@@ -44,27 +36,15 @@ import model.*;
 public class MainFrame extends JFrame implements ActionListener, MouseListener {
 
     // game panel
-    public static final String NEW_GAME = "New Game";
-
-    private JPanel pnlGame = new JPanel();
-    private JButton btnNewGame = new JButton(NEW_GAME);
-    private JTextArea txtGameInfor = new JTextArea();
+    private JMenuItem miRestart = new JMenuItem("Restart");
     // desk panel
     private JLayeredPane pnlDesk = new JLayeredPane();
     private JLabel lblDeck = new JLabel();
     private CardLabel lblDeckCur;
     private CardLabel lblDeckPrev;
-//    private CardLabel lblDeckPre = new CardLabel();
     private JLabel[] lblStack = new JLabel[4];
 
     // 
-    public static Color COLOR_HOMETEAM = new Color(255, 100, 100);
-    public static Color COLOR_GUESTTEAM = new Color(100, 100, 255);
-    public static Dimension DIM_BUTTON = new Dimension(100, 40);
-//    public static Dimension DIM_CARD = new Dimension(142, 192);
-//    public static final int CARD_SPAN = 40;
-    public static Font FONT_MONO = new java.awt.Font("Courier New", 0, 11);
-
     public static Dimension dimCard;
     public static Dimension dimSpan;
     public static Dimension dimFrame;
@@ -72,17 +52,6 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
     private Solitaire game;
     public static final String EMPTY_CARD = "images\\empty.gif";
     public static final String BACK_CARD = "images\\back.png";
-
-    private void initGamePanel(Dimension d) {
-        pnlGame.setBorder(BorderFactory.createTitledBorder("Game Information"));
-        pnlGame.setPreferredSize(d);
-
-        btnNewGame.setPreferredSize(DIM_BUTTON);
-        txtGameInfor.setPreferredSize(new Dimension(d.width - 30, d.height / 5));
-
-        pnlGame.add(btnNewGame);
-        pnlGame.add(txtGameInfor);
-    }
 
     private void initDeskPanel() {
         pnlDesk.setLayout(null);
@@ -99,26 +68,25 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
         this.setTitle("Solitaire Game");
 
         Dimension dimScreen = Toolkit.getDefaultToolkit().getScreenSize();
-        dimFrame = new Dimension(dimScreen.width * 2 / 3 * 6 / 5, dimScreen.height * 2 / 3);
+        dimFrame = new Dimension(dimScreen.width * 2 / 3, dimScreen.height * 2 / 3);
         this.setSize(dimFrame);
 
         this.setLocation((dimScreen.width - dimFrame.width) / 2,
                 (dimScreen.height - dimFrame.height) / 2);
 
-        dimCard = new Dimension(dimFrame.width * 25 / 6 / (6 * 7 + 3), dimFrame.height * 5 / (1 + 5 + 2 + 5 + 7));
+        dimCard = new Dimension(dimFrame.width * 5 / (6 * 7 + 3), dimFrame.height * 5 / (1 + 5 + 2 + 5 + 7));
         dimSpan = new Dimension(dimCard.width / 5, dimCard.height / 5);
 
         initDeskPanel();
-        initGamePanel(new Dimension(dimFrame.width / 5, dimFrame.height));
-
-        this.add(pnlGame, BorderLayout.EAST);
         this.add(pnlDesk);
 
-        addListener();
-    }
+        JMenu menuGame = new JMenu("Restart Game");
+        menuGame.add(miRestart);
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(menuGame);
+        setJMenuBar(menuBar);
 
-    private void addListener() {
-        btnNewGame.addActionListener(this);
+        miRestart.addActionListener(this);
         lblDeck.addMouseListener(this);
     }
 
@@ -144,12 +112,14 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
         recDeck.x += dimCard.width + dimSpan.width;
         lblDeckCur.setBounds(recDeck);
         lblDeckCur.setVisible(!game.deck.isEmpty());
-        Card deckPrevCard = game.deck.getPrevCard();
-        if (deckPrevCard != null) {
-            lblDeckPrev = new CardLabel(deckPrevCard, this, game);
-            lblDeckPrev.setBounds(recDeck);
-            lblDeckPrev.setVisible(true);
-            pnlDesk.add(lblDeckPrev, new Integer(0));
+        if (!game.deck.isLast()) {
+            Card deckPrevCard = game.deck.getPrevCard();
+            if (deckPrevCard != null) {
+                lblDeckPrev = new CardLabel(deckPrevCard, this, game);
+                lblDeckPrev.setBounds(recDeck);
+                lblDeckPrev.setVisible(true);
+                pnlDesk.add(lblDeckPrev, new Integer(0));
+            }
         }
         pnlDesk.add(lblDeckCur, new Integer(1));
 
@@ -205,7 +175,6 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
                 CardLabel lblCard = new CardLabel(list.get(i), this, game);
                 lblCard.setVisible(list.getOpenIndex() <= i);
                 lblCard.setBounds(rec);
-//                pnlLowerDesk.add(lblCard, new Integer(i));
                 pnlDesk.add(lblCard, new Integer(i));
                 rec.y += dimSpan.height;
                 if (i > 0) {
@@ -218,7 +187,7 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
                 maxListSize = list.size();
             }
         }
-        pnlDesk.setPreferredSize(new Dimension(dimFrame.width * 4 / 5, dimCard.height + dimSpan.height * maxListSize - 1));
+        pnlDesk.setPreferredSize(new Dimension(dimFrame.width, dimCard.height + dimSpan.height * maxListSize - 1));
     }
 
     public static int mapListArea(Point p) {
@@ -232,11 +201,9 @@ public class MainFrame extends JFrame implements ActionListener, MouseListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equalsIgnoreCase(NEW_GAME)) {
+        if (e.getSource() == miRestart) {
             game.initSolitaire();
-//            showGameWin();
             showGame();
-//            clearDesk();
         }
     }
 

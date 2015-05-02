@@ -9,17 +9,24 @@ import view.MainFrame;
 /**
  *
  * @author Alan Tian 1302662
+ *
+ * contribution: finished alone by Alan Tian
+ * extensions:
+ * 1 there is an animation when game win
+ *
+ * 2 the GUI is simular to a common windows solitaire game:
+ * 2.1 drag and drop operations on card from deck to list or from list to list
+ * 2.2 double click on current card will execute deck to stack
+ * 2.3 double click on current card will execute list to stack
+ * 2.4 cards have front and back images
  * 
- * contribution: finished alone
- * extension: 
- *  1 there is an animation when game win
- *  2 the GUI is simular to a common windows solitaire game:
- *      2.1 drag and drop operations on card from deck and list
- *      2.2 double click on current card of deck to stack
- *      2.3 double click on current card on list to stack
- *  3 singly linked list for stack
- *  4 circularly linked list for deck
- *  5 doubly linked list for card list
+ * 3 data structures:
+ * 3.1 singly linked list for stack
+ * 3.2 circularly linked list for deck
+ * 3.3 circularly linked list for card list
+ *
+ * 4 CUI version is defined in a separate class SolitaireCui, with project configuration 'CUI'
+ * 
  */
 public class Solitaire {
 
@@ -43,18 +50,11 @@ public class Solitaire {
         Solitaire game = new Solitaire();
         game.initSolitaire();
         showGui(game);
-        game.startGame();
     }
 
     public static void showGui(Solitaire game) {
         MainFrame mainFrame = new MainFrame(game);
         mainFrame.setVisible(true);
-    }
-
-    public void startGame() {
-        // start the game CUI
-//        GameCui cui = new GameCui(this);
-//        cui.startGame();
     }
 
     public void initSolitaire() {
@@ -87,7 +87,7 @@ public class Solitaire {
         for (int i = c; i < cardSet.length; i++) {
             deck.add(cardSet[i]);
         }
-        deck.setCurCard(deck.size()-1);
+        deck.setCurCard(deck.size() - 1);
     }
 
     /* Rearranges an array of objects in uniformly random order
@@ -206,26 +206,42 @@ public class Solitaire {
         return false;
     }
 
+    /**
+     * check if the list index is between 0 to 6
+     *
+     * @param index list index to be checked
+     * @return true for valid index, otherwise false
+     */
+    public static boolean validListIndex(int index) {
+        return (index >= 0) && (index < LIST_NUM);
+    }
+
+    /**
+     * check if the game is win. if all cards in list had been opened, then game
+     * is automatically win
+     *
+     * @return true if the game is win, otherwise false
+     */
     public boolean isGameWin() {
-//        for (int s = 0; s < stacks.length; s++) {
-//            if (stacks[s].size() != Card.SUIT_SIZE) {
-//                return false;
-//            }
-//        }
-//        if (!deck.isEmpty()) {
-//            return false;
-//        } else {
-            for (int l = 0; l < LIST_NUM; l++) {
-                if (lists[l].getOpenIndex() > 0) {
-                    return false;
-                }
+        for (int l = 0; l < LIST_NUM; l++) {
+            if (lists[l].getOpenIndex() > 0) {
+                return false;
             }
-  //      }
-        
-//        Card nextCard = findSendableCard();
-//        if(nextCard!=null)
-//        send(nextCard.getIndex());
+        }
         return true;
+    }
+
+    public boolean isStackFull() {
+        for (int s = 0; s < stacks.length; s++) {
+            if (stacks[s].size() != Card.SUIT_SIZE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isDeckEmpty() {
+        return deck.isEmpty();
     }
 
     public Card findSendableCard() {
@@ -240,13 +256,4 @@ public class Solitaire {
         return nextCard;
     }
 
-    /**
-     * check if the list index is between 0 to 6
-     *
-     * @param index list index to be checked
-     * @return true for valid index, otherwise false
-     */
-    public static boolean validListIndex(int index) {
-        return (index >= 0) && (index < LIST_NUM);
-    }
 }
